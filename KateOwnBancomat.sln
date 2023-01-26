@@ -1,25 +1,101 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.3.32929.385
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KateOwnBancomat", "KateOwnBancomat\KateOwnBancomat.csproj", "{07F2CACF-62A4-4ADA-BE1B-26FAFEE493AF}"
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{07F2CACF-62A4-4ADA-BE1B-26FAFEE493AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{07F2CACF-62A4-4ADA-BE1B-26FAFEE493AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{07F2CACF-62A4-4ADA-BE1B-26FAFEE493AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{07F2CACF-62A4-4ADA-BE1B-26FAFEE493AF}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {09ACA157-85C7-49DB-8EEF-1B50AED76D06}
-	EndGlobalSection
-EndGlobal
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Policy;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace KateOwnBancomat
+{
+    class ATM
+    {
+        private int ID;
+        private double countOfMoney;
+        private int min = 10;
+        private int max;
+        public ATM(int ID, double CountOfMoney, int Min, int Max)
+        {
+            if (Min < 10) throw new ArgumentException("Минимальная сумма не может быть менее 10.");
+            if (Max > 10000) throw new ArgumentException("Максимальная сумма не может быть более 10000.");
+            if (ID < 0) throw new ArgumentException("Идентификационый номер не может быть менее 0.");
+            if (CountOfMoney < 10) throw new ArgumentException("Кол-во денег не может быть меньше 10.");
+
+            this.ID = ID;
+            countOfMoney = CountOfMoney;
+            min = Min;
+            max = Max;
+        }
+        public void OperationInAtm (string Operation)
+        {
+            switch(Operation)
+            {
+                case "1":Console.WriteLine(this.GetCurrentMoney());
+                    break;
+                case "2":
+                    Console.WriteLine("Введите сумму, на какую пополнить. Сумма должна быть кратна 10");
+                    int Money= int.Parse(Console.ReadLine());
+                    this.LoadMoney(Money);
+                    break;
+                case "3":
+                    Console.WriteLine($"Введите сумму, какую хотите снять со счета, максимальная" +
+                        $"сумма 10000 руб., минимальная сумма 10 руб., доступно {this.GetCurrentMoney()}");
+                    int SumDown = int.Parse(Console.ReadLine());
+                    this.Unloading(SumDown);
+                    break;
+                case "4":
+                    Console.WriteLine("Заберите карту");
+                    break;
+                default: Console.WriteLine("Данная операция не определена");
+                    break;
+            }
+        }
+        public double GetCurrentMoney()
+        {
+            return countOfMoney;
+        }
+        public double LoadMoney(int Money)
+        {
+            if (Money % 10 != 0)
+                throw new ArgumentException("Вносиая сумма должна быть кратна 10.");
+
+            countOfMoney += Money;
+            Console.WriteLine($"На счет добавлено {Money} руб., баланс составляет{countOfMoney} руб.");
+            return countOfMoney;
+        }
+        public double Unloading(int Money)
+        {
+            if (Money % 10 != 0)
+                throw new ArgumentException("Снимаемая сумма должна быть кратна 10.");
+
+            if (countOfMoney<Money)
+                throw new ArgumentException("Недостаточно средств.");
+
+            if (Money < min || Money > max)
+                throw new ArgumentException("Некорректная сумма денег.");
+
+            countOfMoney -= Money;
+            Console.WriteLine($"Со счета снято {Money} руб., баланс составляет{countOfMoney} руб.");
+            return countOfMoney;
+        }
+    }
+    public static class Program
+    {
+        static void Main(string[] args)
+        {
+            ATM a = new ATM(1,6253.4,10,10000);
+            string enternum=null;
+            do
+            {
+                Console.WriteLine("Выберите вариант операции: 1- посмотреть баланс, 2 - пополнить счет" +
+                    "3-снять наличные, 4 - завершить работу. После выбора нажмите Enter");
+                string choosenOperation = Console.ReadLine();
+                enternum=choosenOperation;
+                a.OperationInAtm(choosenOperation);
+            }
+            while (enternum!="4");
+
+        }
+    
+    }
+        
+}
